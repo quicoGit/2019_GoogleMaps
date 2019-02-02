@@ -1,12 +1,72 @@
 package com.plumbaria.e_7_5_ejemplogooglemaps
 
+import android.annotation.SuppressLint
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(),
+    GoogleMap.OnMapClickListener,
+    OnMapReadyCallback
+{
+    private val BENIDORM : LatLng = LatLng(38.543685, -0.132227)
+    private val PEREMARIA : LatLng = LatLng(38.553489, -0.121579)
+    private var mapa : GoogleMap? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        var mapFragment : SupportMapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+    }
+
+
+    // Este método se ejecuta cada vez que hacemos clic sobre el mapa.
+    override fun onMapClick(p0: LatLng?) {
+        mapa?.addMarker(MarkerOptions().position(p0!!).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)))
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun onMapReady(googleMap: GoogleMap?) {
+        mapa = googleMap
+        mapa?.mapType = GoogleMap.MAP_TYPE_NORMAL
+        mapa?.moveCamera(CameraUpdateFactory.newLatLngZoom(BENIDORM, 13f))
+        mapa?.isMyLocationEnabled = true
+        mapa?.setOnMapClickListener(this)
+        mapa?.addMarker(MarkerOptions().position(PEREMARIA).title("IES Pere Mª").snippet("IES Pere Maria Orts i Bosch"))
+    }
+
+    /* Mover la cámara */
+    fun moverCamara(v:View) {
+        mapa?.mapType = GoogleMap.MAP_TYPE_NORMAL
+        mapa?.moveCamera(CameraUpdateFactory.newLatLngZoom(BENIDORM,13f))
+    }
+
+    /* Animar camara */
+    fun animarCamera(v:View) {
+        mapa?.mapType = GoogleMap.MAP_TYPE_HYBRID
+        mapa?.animateCamera(CameraUpdateFactory.newLatLngZoom(PEREMARIA,18f))
+    }
+
+    fun aMiPosicion(v:View) {
+        if (mapa?.myLocation != null) {
+            mapa?.mapType = GoogleMap.MAP_TYPE_SATELLITE
+            mapa?.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(
+                        mapa?.myLocation?.latitude!!,
+                        mapa?.myLocation?.longitude!!
+                    ), 20f
+                )
+            )
+        }
     }
 }
